@@ -43,9 +43,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(binding.root)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map_fragment) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        val supportMapFragment = SupportMapFragment.newInstance()
+        supportFragmentManager.beginTransaction()
+            .add(R.id.map_fragment_container, supportMapFragment)
+            .commit()
+        supportMapFragment.getMapAsync(this)
 
         initGoogleMap()
     }
