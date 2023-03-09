@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">My GMap</string>
     <string name="title_activity_maps">MapsActivity</string>
-    <string name="MAPS_API_KEY">Your Key</string>
+    <string name="MAPS_API_KEY">AIzaSyAQahDjitWYdAS3fLFzeNntmbt0ejcEWR8</string>
 </resources>
