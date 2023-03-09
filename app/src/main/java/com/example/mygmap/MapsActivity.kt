@@ -12,15 +12,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.example.mygmap.Constant.PLAY_SERVICES_ERROR_CODE
 import com.example.mygmap.Constant.TAG
-
+import com.example.mygmap.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.example.mygmap.databinding.ActivityMapsBinding
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.maps.SupportMapFragment
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -43,14 +43,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(binding.root)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-//        val mapFragment = supportFragmentManager
-//            .findFragmentById(R.id.map) as SupportMapFragment
-//        mapFragment.getMapAsync(this)
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map_fragment) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
         initGoogleMap()
-        binding.mapView.onCreate(savedInstanceState)
-        binding.mapView.getMapAsync(this)
-
     }
 
     private fun checkLocationPermission(): Boolean {
@@ -117,43 +114,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap = googleMap
 
         // Add a marker in Sydney and move the camera
-        val delhi = LatLng(28.7041, 77.1025 )
+        val delhi = LatLng(28.7041, 77.1025)
         mMap.addMarker(MarkerOptions().position(delhi).title("Marker in Delhi"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(delhi))
     }
 
-    override fun onStart() {
-        super.onStart()
-        binding.mapView.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        binding.mapView.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        binding.mapView.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        binding.mapView.onStop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.mapView.onDestroy()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
-        super.onSaveInstanceState(outState, outPersistentState)
-        binding.mapView.onSaveInstanceState(outState)
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        binding.mapView.onLowMemory()
-    }
 }
