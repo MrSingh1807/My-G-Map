@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.example.mygmap.Constant.PLAY_SERVICES_ERROR_CODE
 import com.example.mygmap.Constant.TAG
 import com.example.mygmap.databinding.ActivityMapsBinding
+import com.example.mygmap.databinding.BtmSheetDialogBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -50,9 +51,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .commit()
         supportMapFragment.getMapAsync(this)
 
-        binding.textView.setOnClickListener{
-            // animate in new location
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(12.9716, 77.5946), 10f))
+        binding.floatingActionButton.setOnClickListener {
+            bottomSheetDialog()
         }
         initGoogleMap()
     }
@@ -106,6 +106,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private fun bottomSheetDialog(){
+        val dialog = BottomSheetDialog(this)
+        val bindingDialog = BtmSheetDialogBinding.inflate(layoutInflater)
+
+        bindingDialog.none.setOnClickListener { mMap.mapType = GoogleMap.MAP_TYPE_NONE }
+        bindingDialog.satellite.setOnClickListener{mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE }
+        bindingDialog.terrain.setOnClickListener{ mMap.mapType = GoogleMap.MAP_TYPE_TERRAIN }
+        bindingDialog.hybrid.setOnClickListener{ mMap.mapType = GoogleMap.MAP_TYPE_HYBRID }
+        bindingDialog.normal.setOnClickListener{ mMap.mapType = GoogleMap.MAP_TYPE_NORMAL}
+        dialog.apply {
+            setCancelable(true)
+            setContentView(bindingDialog.root)
+            show()
+        }
+
+
+    }
 
     /**
      * Manipulates the map once available.
@@ -124,13 +141,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val delhi = LatLng(28.7041, 77.1025)
         mMap.addMarker(MarkerOptions().position(delhi).title("Marker in Delhi"))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(delhi,5F))
-
-//        mMap.uiSettings.isTiltGesturesEnabled = false                       // By default -> true
-//        mMap.uiSettings.isCompassEnabled = false                            // By default -> true
-//        mMap.uiSettings.isScrollGesturesEnabled = false                     // By default -> true
-//        mMap.uiSettings.isZoomGesturesEnabled = false                       // By default -> true
-//        mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = false   // By default -> true
-
     }
 
 }
