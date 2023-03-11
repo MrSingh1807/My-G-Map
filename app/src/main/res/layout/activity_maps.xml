@@ -23,26 +23,10 @@
         map:layout_constraintStart_toStartOf="parent"
         map:layout_constraintTop_toTopOf="parent" />
 
-    <fragment
+    <FrameLayout
         android:id="@+id/map_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-
-        map:cameraTargetLat="28.612970"
-        map:cameraTargetLng="77.229461"
-        map:cameraZoom="10"
-
-        map:cameraBearing="90"
-        map:cameraTilt="60"
-
-        map:uiRotateGestures="true"
-        map:uiTiltGestures="true"
-        map:uiZoomGestures="true"
-        map:uiScrollGestures="true"
-
-        map:mapType="satellite"
-
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent"
         map:layout_constraintHorizontal_bias="0.5"

@@ -43,13 +43,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(binding.root)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val supportMapFragment = supportFragmentManager
-            .findFragmentById(R.id.map_fragment_container) as SupportMapFragment
-//        supportFragmentManager.beginTransaction()
-//            .add(R.id.map_fragment_container, supportMapFragment)
-//            .commit()
+        val supportMapFragment = SupportMapFragment.newInstance()
+
+            supportFragmentManager.beginTransaction()
+            .add(R.id.map_fragment_container, supportMapFragment)
+            .commit()
         supportMapFragment.getMapAsync(this)
 
+        binding.textView.setOnClickListener{
+            // animate in new location
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(12.9716, 77.5946), 10f))
+        }
         initGoogleMap()
     }
 
@@ -119,7 +123,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         // Add a marker in Sydney and move the camera
         val delhi = LatLng(28.7041, 77.1025)
         mMap.addMarker(MarkerOptions().position(delhi).title("Marker in Delhi"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(delhi))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(delhi,5F))
+
+//        mMap.uiSettings.isTiltGesturesEnabled = false                       // By default -> true
+//        mMap.uiSettings.isCompassEnabled = false                            // By default -> true
+//        mMap.uiSettings.isScrollGesturesEnabled = false                     // By default -> true
+//        mMap.uiSettings.isZoomGesturesEnabled = false                       // By default -> true
+//        mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = false   // By default -> true
+
     }
 
 }
