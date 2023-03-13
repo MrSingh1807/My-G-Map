@@ -58,13 +58,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val supportMapFragment = SupportMapFragment.newInstance()
 
-            supportFragmentManager.beginTransaction()
+        supportFragmentManager.beginTransaction()
             .add(R.id.map_fragment_container, supportMapFragment)
             .commit()
         supportMapFragment.getMapAsync(this)
 
         binding.floatingActionButton.setOnClickListener {
             bottomSheetDialog()
+        }
+        binding.go.setOnClickListener {
+
+            val zooInBenglore = LatLng(13.0, 77.6)
+            mMap.addMarker(MarkerOptions().position(zooInBenglore).title("Zoo In Bangalore"))
+
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(zooInBenglore, 8f)
+            val ANIMATION_TIME = 3000
+            mMap.animateCamera(cameraUpdate, ANIMATION_TIME, object : GoogleMap.CancelableCallback {
+                override fun onCancel() {
+                    Toast.makeText(this@MapsActivity, "Animation Cancelled", Toast.LENGTH_SHORT)
+                        .show()
+                }
+
+                override fun onFinish() {
+                    Toast.makeText(this@MapsActivity, "Animation Finished", Toast.LENGTH_SHORT)
+                        .show()
+                }
+
+            })
         }
         initGoogleMap()
     }
@@ -118,15 +138,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun bottomSheetDialog(){
+    private fun bottomSheetDialog() {
         val dialog = BottomSheetDialog(this)
         val bindingDialog = BtmSheetDialogBinding.inflate(layoutInflater)
 
         bindingDialog.none.setOnClickListener { mMap.mapType = GoogleMap.MAP_TYPE_NONE }
-        bindingDialog.satellite.setOnClickListener{mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE }
-        bindingDialog.terrain.setOnClickListener{ mMap.mapType = GoogleMap.MAP_TYPE_TERRAIN }
-        bindingDialog.hybrid.setOnClickListener{ mMap.mapType = GoogleMap.MAP_TYPE_HYBRID }
-        bindingDialog.normal.setOnClickListener{ mMap.mapType = GoogleMap.MAP_TYPE_NORMAL}
+        bindingDialog.satellite.setOnClickListener { mMap.mapType = GoogleMap.MAP_TYPE_SATELLITE }
+        bindingDialog.terrain.setOnClickListener { mMap.mapType = GoogleMap.MAP_TYPE_TERRAIN }
+        bindingDialog.hybrid.setOnClickListener { mMap.mapType = GoogleMap.MAP_TYPE_HYBRID }
+        bindingDialog.normal.setOnClickListener { mMap.mapType = GoogleMap.MAP_TYPE_NORMAL }
         dialog.apply {
             setCancelable(true)
             setContentView(bindingDialog.root)
@@ -152,7 +172,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         // Add a marker in Sydney and move the camera
         val delhi = LatLng(28.7041, 77.1025)
         mMap.addMarker(MarkerOptions().position(delhi).title("Marker in Delhi"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(delhi,5F))
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(delhi, 5F)
+        mMap.moveCamera(cameraUpdate)
 
         // Show UI Controls on GoogleMap
         mMap.uiSettings.apply {
