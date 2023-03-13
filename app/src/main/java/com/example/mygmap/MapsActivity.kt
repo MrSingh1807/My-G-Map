@@ -1,6 +1,7 @@
 package com.example.mygmap
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +21,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
@@ -37,6 +39,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
+    @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -44,6 +47,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(binding.root)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+        /*  Show UI Controls on Google Map
+        val gMapOptions = GoogleMapOptions()
+           .apply {
+                zoomControlsEnabled(true)
+                compassEnabled(true)
+            }
+         */
+
         val supportMapFragment = SupportMapFragment.newInstance()
 
             supportFragmentManager.beginTransaction()
@@ -141,6 +153,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val delhi = LatLng(28.7041, 77.1025)
         mMap.addMarker(MarkerOptions().position(delhi).title("Marker in Delhi"))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(delhi,5F))
+
+        // Show UI Controls on GoogleMap
+        mMap.uiSettings.apply {
+            isZoomControlsEnabled = true
+            isCompassEnabled = true
+            isMapToolbarEnabled = true
+            isMyLocationButtonEnabled = true
+        }
+
     }
 
 }
