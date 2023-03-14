@@ -3,10 +3,13 @@ package com.example.mygmap
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -17,13 +20,13 @@ import com.example.mygmap.databinding.BtmSheetDialogBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.*
+import java.util.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -39,6 +42,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,45 +70,63 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.floatingActionButton.setOnClickListener {
             bottomSheetDialog()
         }
-        binding.go.setOnClickListener {
-            /*
-            Draw a rectangle that you want to show in your Screen
-               Approach - 1: Take
-                either   NorthEast - Latitude & Longitude
-                        SouthWest - Latitude & Longitude
-               or      NorthWest - Latitude & Longitude
-                     SouthEast - Latitude & Longitude
+        binding.searchIV.setOnClickListener {
+            hideKeyboard(binding.root)
 
-                Approach - 2: when You have user location
-                        val Benglore = LatLng(13.0, 77.6)  : (assume this is user live location)
+            val locationName = binding.searchAddressHereEdtTxt.text.toString()
 
-                   make a rectangle :-
-                        topLeftLat or topRightLat = Benglore + 0.1f
-                        topLeftLong or topRightLong = Benglore + 0.1f
+            val geoCoder = Geocoder(this, Locale.getDefault())
 
-                        bottomLeftLat or bottomRightLat = Benglore - 0.1f
-                        bottomLeftLat or bottomRightLat = Benglore - 0.1f
-             */
+            try {
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU)
+                    geoCoder.getFromLocationName(locationName, 1) { addressList ->
+                        if (addressList.size > 0) {
+                            val address = addressList[0]
 
+                            gotoLocation(address.latitude, address.longitude)
+                            mMap.addMarker(
+                                MarkerOptions().position(
+                                    LatLng(
+                                        address.latitude,
+                                        address.longitude
+                                    )
+                                )
+                            )
 
-            val southWestLatitude = 12.843895
-            val southWestLongitude = 77.410526
-            val northEastLatitude = 13.101506
-            val northEastLongitude = 77.766895
+                            Log.d("Map", "Locality: ${address.locality}")
+                        }
+                    }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
 
-            val BENGLURU_BOUNDS = LatLngBounds(
-                LatLng(southWestLatitude, southWestLongitude),
-                LatLng(northEastLatitude, northEastLongitude)
-            )
-
-//            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(BENGLURU_BOUNDS,1))
-//            mMap.addMarker(MarkerOptions().position(BENGLURU_BOUNDS.center))
-
-            mMap.setLatLngBoundsForCameraTarget(BENGLURU_BOUNDS)
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(BENGLURU_BOUNDS, 400, 400, 1))
         }
         initGoogleMap()
     }
+
+    private fun hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    private fun gotoLocation(lat: Double, lng: Double) {
+
+        val latLng = LatLng(lat, lng);
+
+//        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 5f);
+
+        this.runOnUiThread {
+            mMap.addPolyline(PolylineOptions().add(latLng))
+            mMap.animateCamera(
+                CameraUpdateFactory.newCameraPosition(
+                    CameraPosition.Builder().target(latLng).zoom(15f).build()
+                )
+            )
+            mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+        }
+
+    }
+
 
     private fun checkLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
