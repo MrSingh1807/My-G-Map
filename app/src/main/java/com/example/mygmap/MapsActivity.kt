@@ -97,8 +97,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 LatLng(northEastLatitude, northEastLongitude)
             )
 
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(BENGLURU_BOUNDS,1))
-            mMap.addMarker(MarkerOptions().position(BENGLURU_BOUNDS.center))
+//            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(BENGLURU_BOUNDS,1))
+//            mMap.addMarker(MarkerOptions().position(BENGLURU_BOUNDS.center))
+
+            mMap.setLatLngBoundsForCameraTarget(BENGLURU_BOUNDS)
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(BENGLURU_BOUNDS, 400, 400, 1))
         }
         initGoogleMap()
     }
