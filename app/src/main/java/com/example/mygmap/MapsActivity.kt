@@ -21,8 +21,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -67,24 +67,38 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             bottomSheetDialog()
         }
         binding.go.setOnClickListener {
+            /*
+            Draw a rectangle that you want to show in your Screen
+               Approach - 1: Take
+                either   NorthEast - Latitude & Longitude
+                        SouthWest - Latitude & Longitude
+               or      NorthWest - Latitude & Longitude
+                     SouthEast - Latitude & Longitude
 
-            val zooInBenglore = LatLng(13.0, 77.6)
-            mMap.addMarker(MarkerOptions().position(zooInBenglore).title("Zoo In Bangalore"))
+                Approach - 2: when You have user location
+                        val Benglore = LatLng(13.0, 77.6)  : (assume this is user live location)
 
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(zooInBenglore, 8f)
-            val ANIMATION_TIME = 3000
-            mMap.animateCamera(cameraUpdate, ANIMATION_TIME, object : GoogleMap.CancelableCallback {
-                override fun onCancel() {
-                    Toast.makeText(this@MapsActivity, "Animation Cancelled", Toast.LENGTH_SHORT)
-                        .show()
-                }
+                   make a rectangle :-
+                        topLeftLat or topRightLat = Benglore + 0.1f
+                        topLeftLong or topRightLong = Benglore + 0.1f
 
-                override fun onFinish() {
-                    Toast.makeText(this@MapsActivity, "Animation Finished", Toast.LENGTH_SHORT)
-                        .show()
-                }
+                        bottomLeftLat or bottomRightLat = Benglore - 0.1f
+                        bottomLeftLat or bottomRightLat = Benglore - 0.1f
+             */
 
-            })
+
+            val southWestLatitude = 12.843895
+            val southWestLongitude = 77.410526
+            val northEastLatitude = 13.101506
+            val northEastLongitude = 77.766895
+
+            val BENGLURU_BOUNDS = LatLngBounds(
+                LatLng(southWestLatitude, southWestLongitude),
+                LatLng(northEastLatitude, northEastLongitude)
+            )
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(BENGLURU_BOUNDS,1))
+            mMap.addMarker(MarkerOptions().position(BENGLURU_BOUNDS.center))
         }
         initGoogleMap()
     }
