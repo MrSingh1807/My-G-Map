@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import com.example.mygmap.Constant.PLAY_SERVICES_ERROR_CODE
 import com.example.mygmap.Constant.TAG
 import com.example.mygmap.databinding.ActivityMapsBinding
@@ -33,6 +34,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
 
+    lateinit var mainViewModel: MainViewModel
+
     private val requestMultiplePermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -42,23 +45,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
+
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-
-        /*  Show UI Controls on Google Map
-        val gMapOptions = GoogleMapOptions()
-           .apply {
-                zoomControlsEnabled(true)
-                compassEnabled(true)
-            }
-         */
 
         val supportMapFragment = SupportMapFragment.newInstance()
 
@@ -70,37 +63,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.floatingActionButton.setOnClickListener {
             bottomSheetDialog()
         }
+
         binding.searchIV.setOnClickListener {
             hideKeyboard(binding.root)
 
             val locationName = binding.searchAddressHereEdtTxt.text.toString()
-
             val geoCoder = Geocoder(this, Locale.getDefault())
 
-            try {
-                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.TIRAMISU)
-                    geoCoder.getFromLocationName(locationName, 1) { addressList ->
-                        if (addressList.size > 0) {
-                            val address = addressList[0]
-
-                            gotoLocation(address.latitude, address.longitude)
-                            mMap.addMarker(
-                                MarkerOptions().position(
-                                    LatLng(
-                                        address.latitude,
-                                        address.longitude
-                                    )
-                                )
-                            )
-
-                            Log.d("Map", "Locality: ${address.locality}")
-                        }
-                    }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            if (locationName.toDoubleOrNull() != null){
+                mainViewModel.reverseGeocoding(this, mMap, geoCoder, locationName)
+            } else {
+                mainViewModel.geocoding(this, mMap,geoCoder, locationName)
             }
-
         }
+
         initGoogleMap()
     }
 
@@ -109,32 +85,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    private fun gotoLocation(lat: Double, lng: Double) {
-
-        val latLng = LatLng(lat, lng);
-
-//        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 5f);
-
-        this.runOnUiThread {
-            mMap.addPolyline(PolylineOptions().add(latLng))
-            mMap.animateCamera(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.Builder().target(latLng).zoom(15f).build()
-                )
-            )
-            mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-        }
-
-    }
-
-
     private fun checkLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             this@MapsActivity,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     }
-
     private fun isServicesOk(): Boolean {
         val googleApi = GoogleApiAvailability.getInstance()
         val result = googleApi.isGooglePlayServicesAvailable(this)
