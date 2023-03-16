@@ -1,16 +1,23 @@
 package com.example.mygmap
 
 import android.Manifest
-import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.location.LocationManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -26,7 +33,6 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.coroutines.*
 import java.util.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -34,7 +40,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
 
-    lateinit var mainViewModel: MainViewModel
+    private lateinit var mainViewModel: MainViewModel
 
     private val requestMultiplePermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -42,8 +48,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         permissions.entries.forEach {
             Log.d("test006", "${it.key} = ${it.value}")
         }
-
     }
+
+    private val enableLocationLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result :ActivityResult ->
+        if (result.resultCode == RESULT_OK){
+            val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+            val providerEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
+            if (providerEnabled){
+                Toast.makeText(this, "GPS is enabled", Toast.LENGTH_SHORT).show()
+            }
+        } else if (result.resultCode == RESULT_CANCELED){
+            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,13 +73,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        val supportMapFragment = SupportMapFragment.newInstance()
-
-        supportFragmentManager.beginTransaction()
-            .add(R.id.map_fragment_container, supportMapFragment)
-            .commit()
-        supportMapFragment.getMapAsync(this)
 
         binding.floatingActionButton.setOnClickListener {
             bottomSheetDialog()
@@ -79,17 +93,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         initGoogleMap()
     }
-
     private fun hideKeyboard(view: View) {
         val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    private fun checkLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this@MapsActivity,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+
+    private fun initGoogleMap() {
+        if (isServicesOk()) {
+//            if (requestGPSEnabled()) {
+                if (checkLocationPermission()) {
+                    Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show()
+
+                    val supportMapFragment = SupportMapFragment.newInstance()
+
+                    supportFragmentManager.beginTransaction()
+                        .add(R.id.map_fragment_container, supportMapFragment)
+                        .commit()
+                    supportMapFragment.getMapAsync(this)
+                } else {
+                    requestLocationPermission();
+                }
+            }
+//        }
     }
     private fun isServicesOk(): Boolean {
         val googleApi = GoogleApiAvailability.getInstance()
@@ -111,17 +137,32 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         return false
     }
+    private fun requestGPSEnabled(): Boolean{
+        // Enable GPS
+        val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+        val providerEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
-    private fun initGoogleMap() {
-        if (isServicesOk()) {
-            if (checkLocationPermission()) {
-                Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show();
-            } else {
-                requestLocationPermission();
-            }
+        if (providerEnabled){
+            return true
+        } else {
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("GPS Permission")
+                .setMessage("GPS is required, to access current location")
+                .setPositiveButton("Yes"){ dialogInterface, i ->
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    enableLocationLauncher.launch(intent)
+                }
+            dialog.show()
         }
-    }
 
+        return false
+    }
+    private fun checkLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this@MapsActivity,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
     private fun requestLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             requestMultiplePermissionsLauncher.launch(
