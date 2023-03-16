@@ -1,11 +1,9 @@
 package com.example.mygmap
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.LocationManager
@@ -19,6 +17,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.mygmap.Constant.PLAY_SERVICES_ERROR_CODE
@@ -211,12 +210,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val cameraUpdate = CameraUpdateFactory.newLatLngZoom(delhi, 5F)
         mMap.moveCamera(cameraUpdate)
 
-        // Show UI Controls on GoogleMap
-        mMap.uiSettings.apply {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            if (requestGPSEnabled()){
+                requestLocationPermission()
+            }
+            return
+        }
+        mMap.isMyLocationEnabled = true
+//         Show UI Controls on GoogleMap
+        mMap.uiSettings.apply{
             isZoomControlsEnabled = true
-            isCompassEnabled = true
             isMapToolbarEnabled = true
-            isMyLocationButtonEnabled = true
         }
 
     }
