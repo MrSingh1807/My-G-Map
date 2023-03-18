@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.LocationManager
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -17,27 +16,32 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.mygmap.Constant.PLAY_SERVICES_ERROR_CODE
 import com.example.mygmap.Constant.TAG
 import com.example.mygmap.databinding.ActivityMapsBinding
 import com.example.mygmap.databinding.BtmSheetDialogBinding
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.*
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
+    GoogleApiClient.OnConnectionFailedListener {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+    lateinit var mLocationClient: FusedLocationProviderClient
 
     private lateinit var mainViewModel: MainViewModel
 
@@ -51,15 +55,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val enableLocationLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { result :ActivityResult ->
-        if (result.resultCode == RESULT_OK){
+    ) { result: ActivityResult ->
+        if (result.resultCode == RESULT_OK) {
             val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
             val providerEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
-            if (providerEnabled){
+            if (providerEnabled) {
                 Toast.makeText(this, "GPS is enabled", Toast.LENGTH_SHORT).show()
             }
-        } else if (result.resultCode == RESULT_CANCELED){
+        } else if (result.resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show()
         }
     }
@@ -67,11 +71,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
-
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
         binding.floatingActionButton.setOnClickListener {
             bottomSheetDialog()
@@ -83,15 +86,38 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val locationName = binding.searchAddressHereEdtTxt.text.toString()
             val geoCoder = Geocoder(this, Locale.getDefault())
 
-            if (locationName.toDoubleOrNull() != null){
+            if (locationName.toDoubleOrNull() != null) {
                 mainViewModel.reverseGeocoding(this, mMap, geoCoder, locationName)
             } else {
-                mainViewModel.geocoding(this, mMap,geoCoder, locationName)
+                mainViewModel.geocoding(this, mMap, geoCoder, locationName)
+            }
+        }
+        binding.fabLocation.setOnClickListener {
+            if (isServicesOk()) {
+                if (requestGPSEnabled()) {
+                    getCurrentLocation()
+                }
             }
         }
 
+        mLocationClient = LocationServices.getFusedLocationProviderClient(this)
         initGoogleMap()
     }
+
+    @SuppressLint("MissingPermission")
+    private fun getCurrentLocation() {
+        mLocationClient.lastLocation
+            .addOnCompleteListener {task ->
+                if (task.isSuccessful){
+                    val location = task.result
+                    if (location != null){
+                        Log.d(TAG, "isCalled: ${location.latitude} & ${location.longitude}")
+                        mainViewModel.gotoLocation(mMap, this, location.latitude, location.longitude)
+                    }
+                }
+            }
+    }
+
     private fun hideKeyboard(view: View) {
         val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
@@ -100,22 +126,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun initGoogleMap() {
         if (isServicesOk()) {
-//            if (requestGPSEnabled()) {
-                if (checkLocationPermission()) {
-                    Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show()
+            if (checkLocationPermission()) {
+                Toast.makeText(this, "Ready to Map", Toast.LENGTH_SHORT).show()
 
-                    val supportMapFragment = SupportMapFragment.newInstance()
+                val supportMapFragment = SupportMapFragment.newInstance()
 
-                    supportFragmentManager.beginTransaction()
-                        .add(R.id.map_fragment_container, supportMapFragment)
-                        .commit()
-                    supportMapFragment.getMapAsync(this)
-                } else {
-                    requestLocationPermission();
-                }
+                supportFragmentManager.beginTransaction()
+                    .add(R.id.map_fragment_container, supportMapFragment)
+                    .commit()
+                supportMapFragment.getMapAsync(this)
+            } else {
+                requestLocationPermission();
             }
-//        }
+        }
     }
+
     private fun isServicesOk(): Boolean {
         val googleApi = GoogleApiAvailability.getInstance()
         val result = googleApi.isGooglePlayServicesAvailable(this)
@@ -136,32 +161,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         return false
     }
-    private fun requestGPSEnabled(): Boolean{
+
+    private fun requestGPSEnabled(): Boolean {
         // Enable GPS
         val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
         val providerEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
-        if (providerEnabled){
+        if (providerEnabled) {
             return true
         } else {
             val dialog = AlertDialog.Builder(this)
                 .setTitle("GPS Permission")
                 .setMessage("GPS is required, to access current location")
-                .setPositiveButton("Yes"){ dialogInterface, i ->
+                .setPositiveButton("Yes") { dialogInterface, i ->
                     val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     enableLocationLauncher.launch(intent)
                 }
             dialog.show()
         }
-
         return false
     }
+
     private fun checkLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             this@MapsActivity,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     }
+
     private fun requestLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             requestMultiplePermissionsLauncher.launch(
@@ -210,33 +237,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val cameraUpdate = CameraUpdateFactory.newLatLngZoom(delhi, 5F)
         mMap.moveCamera(cameraUpdate)
 
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            if (requestGPSEnabled()){
-                requestLocationPermission()
-            }
-            return
-        }
-        mMap.isMyLocationEnabled = true
 //         Show UI Controls on GoogleMap
-        mMap.uiSettings.apply{
+        mMap.uiSettings.apply {
             isZoomControlsEnabled = true
             isMapToolbarEnabled = true
         }
 
+    }
+
+    override fun onConnected(p0: Bundle?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onConnectionSuspended(p0: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onConnectionFailed(connectionResult: ConnectionResult) {
+        TODO("Not yet implemented")
     }
 
 }

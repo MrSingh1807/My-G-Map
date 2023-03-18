@@ -88,13 +88,14 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun gotoLocation(mMap: GoogleMap, context: Activity, lat: Double, lng: Double) {
+    fun gotoLocation(mMap: GoogleMap, context: Activity, lat: Double, lng: Double) {
 
         val latLng = LatLng(lat, lng)
 //        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 5f)
 
         context.runOnUiThread {
             mMap.addPolyline(PolylineOptions().add(latLng))
+            mMap.addMarker(MarkerOptions().position(latLng).title("Marker in Delhi"))
             mMap.animateCamera(
                 CameraUpdateFactory.newCameraPosition(
                     CameraPosition.Builder().target(latLng).zoom(10f).build()
