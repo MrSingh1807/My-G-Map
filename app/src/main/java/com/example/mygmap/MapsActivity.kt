@@ -9,6 +9,7 @@ import android.location.Geocoder
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
@@ -25,9 +26,12 @@ import com.example.mygmap.databinding.ActivityMapsBinding
 import com.example.mygmap.databinding.BtmSheetDialogBinding
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -36,12 +40,12 @@ import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.util.*
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
-    GoogleApiClient.OnConnectionFailedListener {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
     lateinit var mLocationClient: FusedLocationProviderClient
+    private lateinit var mLocationCallbacks: LocationCallback
 
     private lateinit var mainViewModel: MainViewModel
 
@@ -95,24 +99,47 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
         binding.fabLocation.setOnClickListener {
             if (isServicesOk()) {
                 if (requestGPSEnabled()) {
-                    getCurrentLocation()
+//                    getCurrentLocation()
+                    getLocationUpdates()
                 }
             }
         }
 
         mLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        mLocationCallbacks = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult ?: return
+                val location = locationResult.lastLocation
+                Toast.makeText(
+                    this@MapsActivity,
+                    "Location is: Latitude -> ${location?.longitude}, Longitude -> ${location?.longitude}",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                Log.d(
+                    TAG,
+                    "Location is: Latitude -> ${location?.longitude}, Longitude -> ${location?.longitude}"
+                )
+            }
+        }
         initGoogleMap()
     }
 
     @SuppressLint("MissingPermission")
     private fun getCurrentLocation() {
+        // Playing with Current Location
         mLocationClient.lastLocation
-            .addOnCompleteListener {task ->
-                if (task.isSuccessful){
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
                     val location = task.result
-                    if (location != null){
+                    if (location != null) {
                         Log.d(TAG, "isCalled: ${location.latitude} & ${location.longitude}")
-                        mainViewModel.gotoLocation(mMap, this, location.latitude, location.longitude)
+                        mainViewModel.gotoLocation(
+                            mMap,
+                            this,
+                            location.latitude,
+                            location.longitude
+                        )
                     }
                 }
             }
@@ -245,16 +272,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleApiClient.Co
 
     }
 
-    override fun onConnected(p0: Bundle?) {
-        TODO("Not yet implemented")
+    @SuppressLint("MissingPermission")
+    fun getLocationUpdates() {
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000)
+            .setWaitForAccurateLocation(false)
+            .setMinUpdateIntervalMillis(2000)
+            .setMaxUpdateDelayMillis(10000)
+            .build()
+
+        mLocationClient.requestLocationUpdates(locationRequest, mLocationCallbacks, Looper.getMainLooper())
     }
 
-    override fun onConnectionSuspended(p0: Int) {
-        TODO("Not yet implemented")
-    }
+    override fun onPause() {
+        super.onPause()
+        // when device is under 8.0 Version
+        if (mLocationCallbacks != null){
+            mLocationClient.removeLocationUpdates(mLocationCallbacks)
+        }
 
-    override fun onConnectionFailed(connectionResult: ConnectionResult) {
-        TODO("Not yet implemented")
     }
 
 }
