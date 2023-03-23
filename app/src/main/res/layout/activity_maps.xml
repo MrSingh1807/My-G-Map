@@ -23,6 +23,30 @@
         map:layout_constraintStart_toStartOf="parent"
         map:layout_constraintTop_toTopOf="parent" />
 
+    <ImageView
+        android:id="@+id/searchIV"
+        android:layout_width="50dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/darker_gray"
+        map:layout_constraintBottom_toBottomOf="@+id/searchAddressHereEdtTxt"
+        map:layout_constraintEnd_toEndOf="parent"
+        map:layout_constraintTop_toTopOf="@+id/searchAddressHereEdtTxt"
+        map:srcCompat="@drawable/ic_search"
+        android:contentDescription="Location Search" />
+
+    <TextView
+        android:id="@+id/locationOutPutTV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:hint="Updated Location"
+        android:textSize="18sp"
+        android:paddingStart="5sp"
+        map:layout_constraintEnd_toEndOf="@+id/searchIV"
+        map:layout_constraintStart_toStartOf="@+id/searchAddressHereEdtTxt"
+        map:layout_constraintTop_toBottomOf="@id/searchAddressHereEdtTxt" />
+
     <FrameLayout
         android:id="@+id/map_fragment_container"
         android:layout_width="match_parent"
@@ -32,7 +56,7 @@
         map:layout_constraintEnd_toEndOf="parent"
         map:layout_constraintHorizontal_bias="1.0"
         map:layout_constraintStart_toStartOf="parent"
-        map:layout_constraintTop_toBottomOf="@+id/searchAddressHereEdtTxt"
+        map:layout_constraintTop_toBottomOf="@+id/locationOutPutTV"
         map:layout_constraintVertical_bias="1.0">
 
     </FrameLayout>
@@ -56,21 +80,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:backgroundTint="@android:color/transparent"
+        android:backgroundTint="@android:color/holo_green_light"
         android:clickable="true"
         android:contentDescription="Type"
         map:layout_constraintEnd_toEndOf="parent"
         map:layout_constraintTop_toTopOf="@+id/map_fragment_container"
         map:srcCompat="@drawable/ic_location" />
-    <ImageView
-        android:id="@+id/searchIV"
-        android:layout_width="50dp"
-        android:layout_height="0dp"
-        android:layout_marginEnd="8dp"
-        map:layout_constraintBottom_toBottomOf="@+id/searchAddressHereEdtTxt"
-        map:layout_constraintEnd_toEndOf="parent"
-        map:layout_constraintTop_toTopOf="@+id/searchAddressHereEdtTxt"
-        map:srcCompat="@drawable/ic_search" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 
 <!-- Also use FrameLayout in Place of FragmentContainerView-->

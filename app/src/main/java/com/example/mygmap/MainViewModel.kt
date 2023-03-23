@@ -102,6 +102,8 @@ class MainViewModel : ViewModel() {
                 )
             )
             mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+
+            Log.d(TAG, "Thread Name: ${Thread.currentThread().name}")
         }
 
     }

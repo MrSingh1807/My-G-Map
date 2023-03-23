@@ -9,6 +9,7 @@ import android.location.Geocoder
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.os.HandlerThread
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
@@ -48,6 +49,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mLocationCallbacks: LocationCallback
 
     private lateinit var mainViewModel: MainViewModel
+    private lateinit var mHandlerThread: HandlerThread
 
     private val requestMultiplePermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -108,17 +110,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mLocationClient = LocationServices.getFusedLocationProviderClient(this)
         mLocationCallbacks = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                locationResult ?: return
                 val location = locationResult.lastLocation
+
                 Toast.makeText(
                     this@MapsActivity,
-                    "Location is: Latitude -> ${location?.longitude}, Longitude -> ${location?.longitude}",
+                    "Location is: \nLatitude -> ${location!!.longitude} \nLongitude -> ${location.longitude}",
                     Toast.LENGTH_SHORT
                 ).show()
 
+                binding.locationOutPutTV.text = "Latitude: ${location?.latitude}; Longitude: ${location?.longitude}"
+                mainViewModel.gotoLocation(mMap, this@MapsActivity, location.latitude, location.longitude)
+
                 Log.d(
                     TAG,
-                    "Location is: Latitude -> ${location?.longitude}, Longitude -> ${location?.longitude}"
+                    "Location is: Latitude -> ${location.latitude}, Longitude -> ${location.longitude}"
                 )
             }
         }
@@ -241,8 +246,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             setContentView(bindingDialog.root)
             show()
         }
-
-
     }
 
     /**
@@ -269,7 +272,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             isZoomControlsEnabled = true
             isMapToolbarEnabled = true
         }
-
     }
 
     @SuppressLint("MissingPermission")
@@ -280,7 +282,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .setMaxUpdateDelayMillis(10000)
             .build()
 
-        mLocationClient.requestLocationUpdates(locationRequest, mLocationCallbacks, Looper.getMainLooper())
+        mHandlerThread = HandlerThread("LocationThread", Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+        mHandlerThread.start()
+        mLocationClient.requestLocationUpdates(locationRequest, mLocationCallbacks, mHandlerThread.looper)
     }
 
     override fun onPause() {
@@ -292,4 +296,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mHandlerThread.quit()
+    }
 }
