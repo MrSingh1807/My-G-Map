@@ -2,4 +2,10 @@
     <string name="app_name">My GMap</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="MAPS_API_KEY">AIzaSyAQahDjitWYdAS3fLFzeNntmbt0ejcEWR8</string>
+
+    <plurals name="num_locations_reported">
+        <item quantity="zero">No Location Reported</item>
+        <item quantity="one">One Location Reported</item>
+        <item quantity="other">%d Locations Reported</item>
+    </plurals>
 </resources>

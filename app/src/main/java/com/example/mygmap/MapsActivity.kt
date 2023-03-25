@@ -15,6 +15,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -105,6 +106,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     getLocationUpdates()
                 }
             }
+        }
+        binding.batchedLocationsBTN.setOnClickListener {
+            val intent = Intent(this@MapsActivity, BatchLocationActivity::class.java)
+            startActivity(intent)
         }
 
         mLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -279,7 +284,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000)
             .setWaitForAccurateLocation(false)
             .setMinUpdateIntervalMillis(2000)
-            .setMaxUpdateDelayMillis(10000)
+            .setIntervalMillis(5000)
             .build()
 
         mHandlerThread = HandlerThread("LocationThread", Priority.PRIORITY_BALANCED_POWER_ACCURACY)
