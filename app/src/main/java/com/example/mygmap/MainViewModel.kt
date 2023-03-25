@@ -5,7 +5,6 @@ import android.location.Geocoder
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.example.mygmap.Constant.TAG
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
@@ -74,11 +73,11 @@ class MainViewModel : ViewModel() {
                                 )
                             )
                         )
-                        Log.d(Constant.TAG, "Locality: ${address.locality}")
+                        Log.d(TAG, "Locality: ${address.locality}")
                     }
                     addressList.forEach { address ->
                         Log.d(
-                            Constant.TAG,
+                            TAG,
                             "GeoLocate Address: ${address.getAddressLine(address.maxAddressLineIndex)}"
                         )
                     }

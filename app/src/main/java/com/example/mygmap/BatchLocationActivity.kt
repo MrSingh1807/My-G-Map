@@ -1,18 +1,18 @@
 package com.example.mygmap
 
 import android.annotation.SuppressLint
+import android.content.SharedPreferences
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.util.Log
-import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import com.example.mygmap.databinding.ActivityBatchLocationBinding
-import com.example.mygmap.databinding.ActivityMapsBinding
 import com.google.android.gms.location.*
 
-class BatchLocationActivity : AppCompatActivity() {
+class BatchLocationActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     private lateinit var binding: ActivityBatchLocationBinding
     private lateinit var mLocationClient: FusedLocationProviderClient
@@ -31,6 +31,7 @@ class BatchLocationActivity : AppCompatActivity() {
                 val locations = locationResult.locations
                 val locationHelper = LocationResultHelper(this@BatchLocationActivity, locations)
                 locationHelper.showNotification()
+                locationHelper.saveLocationResult()
                 binding.tvOutput.text = locationHelper.getLocationResultText()
 
                 Toast.makeText(
@@ -40,7 +41,7 @@ class BatchLocationActivity : AppCompatActivity() {
                 ).show()
 
                 Log.d(
-                    Constant.TAG,
+                    TAG,
                     "BatchLocationActivity_Location is: ${locations.size}"
                 )
             }
@@ -62,6 +63,28 @@ class BatchLocationActivity : AppCompatActivity() {
         mLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, null)
     }
 
+    override fun onSharedPreferenceChanged(sP: SharedPreferences?, key: String?) {
+        if (key == KEY_LOCATION_RESULTS) {
+            binding.tvOutput.text = LocationResultHelper.getSavedLocationResult(this)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .registerOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.tvOutput.text = LocationResultHelper.getSavedLocationResult(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .unregisterOnSharedPreferenceChangeListener(this)
+    }
     override fun onPause() {
         super.onPause()
 

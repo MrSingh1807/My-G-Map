@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.mygmap.Constant.CHANNEL_ID
 
 class MyApplication : Application() {
 
