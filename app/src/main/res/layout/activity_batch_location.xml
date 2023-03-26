@@ -23,6 +23,26 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/startLocationRequestServiceBTN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Start Request Location Service"
+        app:layout_constraintBottom_toTopOf="@+id/stopLocationRequestServiceBTN"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/stopLocationRequestServiceBTN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Stop Request Location Service"
+        app:layout_constraintBottom_toTopOf="@+id/locationRequestBTN"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/locationRequestBTN"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

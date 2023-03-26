@@ -1,6 +1,7 @@
 package com.example.mygmap
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
@@ -9,6 +10,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.mygmap.databinding.ActivityBatchLocationBinding
 import com.google.android.gms.location.*
 
@@ -48,6 +50,16 @@ class BatchLocationActivity : AppCompatActivity(), SharedPreferences.OnSharedPre
         }
         binding.locationRequestBTN.setOnClickListener {
             requestBatchLocationUpdates()
+        }
+        binding.startLocationRequestServiceBTN.setOnClickListener {
+            val intent = Intent(this, MyLocationService::class.java)
+            ContextCompat.startForegroundService(this,intent)
+            Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show()
+        }
+        binding.stopLocationRequestServiceBTN.setOnClickListener {
+            val intent = Intent(this, MyLocationService::class.java)
+            stopService(intent)
+            Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show()
         }
 
     }

@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -152,6 +153,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun initGoogleMap() {
         if (isServicesOk()) {
             if (checkLocationPermission()) {
@@ -217,12 +219,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun requestLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             requestMultiplePermissionsLauncher.launch(
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.FOREGROUND_SERVICE,
+                    Manifest.permission.POST_NOTIFICATIONS
                 )
             )
         }
@@ -272,14 +277,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     fun getLocationUpdates() {
+
+        mHandlerThread = HandlerThread("LocationThread", Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+        mHandlerThread.start()
+
         val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000)
             .setWaitForAccurateLocation(false)
             .setMinUpdateIntervalMillis(2000)
             .setIntervalMillis(5000)
             .build()
 
-        mHandlerThread = HandlerThread("LocationThread", Priority.PRIORITY_BALANCED_POWER_ACCURACY)
-        mHandlerThread.start()
         mLocationClient.requestLocationUpdates(locationRequest, mLocationCallbacks, mHandlerThread.looper)
     }
 
@@ -289,7 +296,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         if (mLocationCallbacks != null){
             mLocationClient.removeLocationUpdates(mLocationCallbacks)
         }
-
     }
 
     override fun onDestroy() {
