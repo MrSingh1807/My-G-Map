@@ -16,8 +16,8 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 
 class MyLocationService : Service() {
-    lateinit var mLocationClient: FusedLocationProviderClient
-    lateinit var mLocationCallback: LocationCallback
+    private lateinit var mLocationClient: FusedLocationProviderClient
+    private lateinit var mLocationCallback: LocationCallback
 
     override fun onCreate() {
         super.onCreate()
@@ -69,7 +69,7 @@ class MyLocationService : Service() {
         return null
     }
 
-    fun getLocationUpdated() {
+    private fun getLocationUpdated() {
         val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000)
             .setWaitForAccurateLocation(false)
             .setMinUpdateIntervalMillis(2000)

@@ -99,6 +99,16 @@ class LocationResultHelper(
             return PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(KEY_LOCATION_RESULTS, "Default Value")
         }
+        fun getLocationRequestStatus(context: Context) : Boolean{
+           return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(KEY_LOCATION_REQUEST, false)
+        }
+        fun setLocationRequestStatus(context: Context, value: Boolean){
+            PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(KEY_LOCATION_REQUEST, value)
+                .apply()
+        }
     }
 
 }

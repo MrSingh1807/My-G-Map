@@ -68,6 +68,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMapsBinding.inflate(layoutInflater)

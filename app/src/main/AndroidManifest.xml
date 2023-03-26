@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".MyApplication"
@@ -19,11 +19,12 @@
         android:theme="@style/Theme.MyGMap"
         tools:targetApi="31">
         <service
+            android:name=".MyBackgroundLocationService"
+            android:exported="false"></service>
+        <service
             android:name=".MyLocationService"
             android:enabled="true"
-            android:exported="false">
-
-        </service>
+            android:exported="false"></service>
 
         <activity
             android:name=".BatchLocationActivity"
