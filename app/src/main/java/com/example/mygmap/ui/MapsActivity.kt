@@ -1,4 +1,4 @@
-package com.example.mygmap
+package com.example.mygmap.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -21,6 +21,10 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import com.example.mygmap.MainViewModel
+import com.example.mygmap.PLAY_SERVICES_ERROR_CODE
+import com.example.mygmap.R
+import com.example.mygmap.TAG
 import com.example.mygmap.databinding.ActivityMapsBinding
 import com.example.mygmap.databinding.BtmSheetDialogBinding
 import com.google.android.gms.common.ConnectionResult
@@ -76,9 +80,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
-        binding.floatingActionButton.setOnClickListener {
-            bottomSheetDialog()
-        }
+//        binding.floatingActionButton.setOnClickListener {
+//            bottomSheetDialog()
+//        }
 
         binding.searchIV.setOnClickListener {
             hideKeyboard(binding.root)
@@ -95,8 +99,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.fabLocation.setOnClickListener {
             if (isServicesOk()) {
                 if (requestGPSEnabled()) {
-//                    getCurrentLocation()
-                    getLocationUpdates()
+                    getCurrentLocation()
+//                    getLocationUpdates()
                 }
             }
         }

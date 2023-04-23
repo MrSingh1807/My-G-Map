@@ -1,4 +1,4 @@
-package com.example.mygmap
+package com.example.mygmap.services
 
 import android.app.IntentService
 import android.app.Notification
@@ -6,6 +6,11 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.mygmap.ACTION_PROCESS_UPDATES
+import com.example.mygmap.CHANNEL_ID
+import com.example.mygmap.LocationResultHelper
+import com.example.mygmap.R
+import com.example.mygmap.TAG
 import com.google.android.gms.location.LocationResult
 
 class MyBackgroundLocationService : IntentService("MyBackgroundLocationService"){

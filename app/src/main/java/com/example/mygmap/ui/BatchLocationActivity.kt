@@ -1,4 +1,4 @@
-package com.example.mygmap
+package com.example.mygmap.ui
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -11,6 +11,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.example.mygmap.ACTION_PROCESS_UPDATES
+import com.example.mygmap.KEY_LOCATION_REQUEST
+import com.example.mygmap.KEY_LOCATION_RESULTS
+import com.example.mygmap.LocationResultHelper
+import com.example.mygmap.services.MyBackgroundLocationService
+import com.example.mygmap.TAG
 import com.example.mygmap.databinding.ActivityBatchLocationBinding
 import com.google.android.gms.location.*
 

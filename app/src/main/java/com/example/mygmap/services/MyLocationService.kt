@@ -1,9 +1,7 @@
-package com.example.mygmap
+package com.example.mygmap.services
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.*
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -13,6 +11,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import com.example.mygmap.CHANNEL_ID
+import com.example.mygmap.LocationResultHelper
+import com.example.mygmap.R
+import com.example.mygmap.TAG
 import com.google.android.gms.location.*
 
 class MyLocationService : Service() {

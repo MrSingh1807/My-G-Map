@@ -11,6 +11,7 @@ import android.location.Location
 import android.os.Build
 import android.preference.PreferenceManager
 import androidx.annotation.RequiresApi
+import com.example.mygmap.ui.MapsActivity
 import java.lang.StringBuilder
 import java.text.DateFormat
 import java.util.*
